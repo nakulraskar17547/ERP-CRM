@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  fullName  String
+  role      String   @default("SALES")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stockMovements StockMovement[]
+  challans       Challan[]
+}
+
+model Customer {
+  id           String    @id @default(uuid())
+  customerName String
+  mobileNumber String
+  email        String?
+  businessName String
+  gstNumber    String?
+  customerType String    @default("WHOLESALE")
+  address      String
+  status       String    @default("LEAD")
+  followUpDate DateTime?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  challans Challan[]
+}
+
+model Product {
+  id                String   @id @default(uuid())
+  productName       String
+  SKU               String   @unique
+  category          String
+  unitPrice         Float
+  currentStock      Int      @default(0)
+  minimumStockAlert Int      @default(10)
+  warehouseLocation String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  stockMovements StockMovement[]
+  items          ChallanItem[]
+}
+
+model StockMovement {
+  id              String   @id @default(uuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantityChanged Int
+  movementType    String
+  reason          String
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id])
+  timestamp       DateTime @default(now())
+}
+
+model Challan {
+  id            String   @id @default(uuid())
+  challanNumber String   @unique
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  totalQuantity Int      @default(0)
+  totalAmount   Float    @default(0.0)
+  status        String   @default("DRAFT")
+  createdById   String
+  createdBy     User     @relation(fields: [createdById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items ChallanItem[]
+}
+
+model ChallanItem {
+  id          String  @id @default(uuid())
+  challanId   String
+  challan     Challan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  productName String
+  unitPrice   Float
+  quantity    Int
+  subtotal    Float
+}
