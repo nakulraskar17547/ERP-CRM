@@ -17,7 +17,11 @@ app.use(helmet());
 app.use(
   cors({
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://erp-crm-lilac.vercel.app', process.env.FRONTEND_URL || ''] 
+      ? [
+          'https://erp-crm-lilac.vercel.app',
+          'https://erp-crm-git-main-nakul8.vercel.app',
+          process.env.FRONTEND_URL || ''
+        ]
       : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5001'],
     credentials: true,
   })
